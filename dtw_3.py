@@ -1,10 +1,11 @@
-import numpy as np
 import math
 import scipy
 import sklearn
 from collections import defaultdict
 import librosa
+import sys
 # from google.colab import drive
+
 
 def euclidienne( a, b ):
     return abs( a - b )
@@ -43,32 +44,51 @@ def dtw( A, B, I, J, x ):
     print( g )
     return g[I-1][J-1] / ( I+J )
 
+# compare est une fonction de comparaison 
+# remplacer librosa.load et décomenter l'import de google colab
+# Ex y, sr = librosa.load("corpus/dronevolant_bruite/M01_arretetoi.wav", offset=30, duration=5)
+# https://stackoverflow.com/questions/6932096/matching-two-series-of-mfcc-coefficients
+# https://stackoverflow.com/questions/8433401/defining-a-matrix-norm-to-compare-two-mfcc-matrices
+def compare_mfcc( file1, file2 ):
+	y1, sr1 = librosa.load( file1 )
+	y2, sr2 = librosa.load( file2 )
+	
+	mfcc1 = librosa.feature.mfcc( y=y1, sr=sr1 )
+	mfcc2 = librosa.feature.mfcc( y=y2, sr=sr2 )
+	
+	minlen = min( len( mfcc1 ), len( mfcc2 ) )
+	
+	# TODO comparare les lignes de chaque matrice je ne sais pas tres bien comment 
+	
+	dist = 0 # somme de dtw( mfcc1[i], mfcc2[i] )
+	print("The normalized distance between the two : ",dist)   # 0 for similar audios 
+
   
 def main():
-    A = [ -2, 10, -10, 15, -13, 20, -5, 14, 2 ]
-    B = [ 3, -13, 14, -7, 9, -2 ]
+    # A = [ -2, 10, -10, 15, -13, 20, -5, 14, 2 ]
+    # B = [ 3, -13, 14, -7, 9, -2 ]
 
-    s1 = [ 'X', 'C', 'U' ]
-    s2 = [ 'X', 'C', 'U' ]
-    
-    obs = [ 'X', 'X', 'V', 'U', 'X', 'C', 'X']
-    cinq = [ 'X', 'V', 'V','C','X']
-    cent = [ 'X', 'V', 'V']
-    vingth = ['Ux', 'V', 'V']
+    # s1 = [ 'X', 'C', 'U' ]
+    # s2 = [ 'X', 'C', 'U' ]
+    # 
+    # obs = [ 'X', 'X', 'V', 'U', 'X', 'C', 'X']
+    # cinq = [ 'X', 'V', 'V','C','X']
+    # cent = [ 'X', 'V', 'V']
+    # vingth = ['Ux', 'V', 'V']
 
-    z =  dtw( A, B, 5, 5, euclidienne)
-    x1 = dtw( obs, cinq, len(obs), len(cinq), sonsTD )
-    x2 = dtw( obs, cent, len(obs), len(cent), sonsTD )
-    x3 = dtw( obs, cent, len(obs), len(vingth), sonsTD )
+    # z =  dtw( A, B, 5, 5, euclidienne)
+    # x1 = dtw( obs, cinq, len(obs), len(cinq), sonsTD )
+    # x2 = dtw( obs, cent, len(obs), len(cent), sonsTD )
+    # x3 = dtw( obs, cent, len(obs), len(vingth), sonsTD )
 
-    print(z, x1, x2, x3)   
-    
-    # y, sr = librosa.load("corpus/dronevolant_bruite/M01_arretetoi.wav", offset=30, duration=5)
-    y, sr = librosa.load("M01_arretetoi.wav")
-    mfcc = librosa.feature.mfcc(y=y, sr=sr, hop_length=1024, htk=True, n_mfcc=12)
-    print( y, mfcc )
-    
+    # print(z, x1, x2, x3)
+
+	if ( len( sys.argv ) != 3 ):
+		print( "Usage: $python3 %s <file1.wav> <file2.wav>" % sys.argv[0] )
+
+	print( "Comparing", sys.argv[1], sys.argv[2] )
+	compare_mfcc( sys.argv[1], sys.argv[2] )
+	
 main()
-
 ## Rapport : differents ponderations, couts ...
 
