@@ -91,4 +91,9 @@ def main():
 	
 main()
 ## Rapport : differents ponderations, couts ...
-
+## scénarios à comparer:
+#	-> bruite - nonbruite ( homme )
+#	-> femme - femme
+# 	-> homme - homme
+# 	-> home - femme
+# TODO terminer algorithme de comparaison, comparer les différents scénarios
