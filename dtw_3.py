@@ -9,7 +9,7 @@ import numpy as np
 
 
 def euclidienne( a, b ):
-return abs( a - b ) 
+    return abs( a - b ) 
 
 def lettres( a, b ):
     return 0 if a==b else 1
@@ -31,14 +31,14 @@ def dtw( A, B, I, J, x ):
     w1 = 2
     w2 = 1
     
-    g = np.zeros( (I, J) )
-    for j in range( 1, J ):
+    g = np.zeros( (I+1, J+1) )
+    for j in range( 1, J+1 ):
         g[0][j] = float("inf")
     
-    for i in range( 1, I ):
+    for i in range( 1, I+1 ):
         g[i][0] = float("inf")
-        for j in range( 1, J ):
-            d = x( A[i], B[j] )
+        for j in range( 1, J+1 ):
+            d = x( A[i-1], B[j-1] )
             g[i][j] = min( g[i-1][j] + w0*d,
                            g[i-1][j-1] + w1*d,    
                            g[i][j-1] + w2*d )
@@ -49,8 +49,8 @@ def compare_mfcc( file1, file2 ):
     y1, sr1 = librosa.load( file1 )
     y2, sr2 = librosa.load( file2 )
     
-    mfcc1 = np.array( librosa.feature.mfcc( y=y1, sr=sr1, hop_length=1024, htk=True ) )
-    mfcc2 = np.array( librosa.feature.mfcc( y=y2, sr=sr2, hop_length=1024, htk=True ) )
+    mfcc1 = np.array( librosa.feature.mfcc( y=y1, sr=sr1) )
+    mfcc2 = np.array( librosa.feature.mfcc( y=y2, sr=sr2) )
 
     dist = list()
     for i in range( len( mfcc1 ) ):
@@ -62,8 +62,27 @@ def compare_mfcc( file1, file2 ):
     avr_dist = np.average( dist )
     print( dist, "\n", avr_dist )
  
-# TODO Le code fonctionne mais le resultat est caca je crois
+# TODO le contenu de dist est peut être pas bon 
 # ------------------------------------------------------------------------------------- # 
+
+
+A = [ -2, 10, -10, 15, -13, 20, -5, 14, 2 ]
+B = [ 3, -13, 14, -7, 9, -2 ]
+
+s1 = [ 'X', 'C', 'U' ]
+s2 = [ 'X', 'C', 'U' ]
+
+obs = [ 'X', 'X', 'V', 'U', 'X', 'C', 'X']
+cinq = np.array( [ 'X', 'V', 'V','C','X'] )
+cent = np.array( [ 'X', 'V', 'V'] )
+vingth = ['Ux', 'V', 'V']
+
+z =  dtw( B, A, 6, 9, euclidienne)
+x1 = dtw( cinq, obs,  len(cinq), len(obs), sonsTD )
+x2 = dtw( cent, obs,  len(cent), len(obs), sonsTD )
+x3 = dtw( vingth, obs,  len(vingth),len(obs), sonsTD )
+
+print(z, x1, x2, x3)
 
 if ( len( sys.argv ) != 3 ):
     print( "Usage: $python3 %s <file1.wav> <file2.wav>" % sys.argv[0] )
@@ -86,21 +105,3 @@ compare_mfcc( sys.argv[1], sys.argv[2] )
 # https://stackoverflow.com/questions/6932096/matching-two-series-of-mfcc-coefficients
 # https://stackoverflow.com/questions/8433401/defining-a-matrix-norm-to-compare-two-mfcc-matrices
 
-
-# A = [ -2, 10, -10, 15, -13, 20, -5, 14, 2 ]
-# B = [ 3, -13, 14, -7, 9, -2 ]
-
-# s1 = [ 'X', 'C', 'U' ]
-# s2 = [ 'X', 'C', 'U' ]
-# 
-# obs = [ 'X', 'X', 'V', 'U', 'X', 'C', 'X']
-# cinq = [ 'X', 'V', 'V','C','X']
-# cent = [ 'X', 'V', 'V']
-# vingth = ['Ux', 'V', 'V']
-
-# z =  dtw( A, B, 5, 5, euclidienne)
-# x1 = dtw( obs, cinq, len(obs), len(cinq), sonsTD )
-# x2 = dtw( obs, cent, len(obs), len(cent), sonsTD )
-# x3 = dtw( obs, cent, len(obs), len(vingth), sonsTD )
-
-# print(z, x1, x2, x3)
