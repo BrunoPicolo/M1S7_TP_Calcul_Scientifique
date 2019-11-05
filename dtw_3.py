@@ -42,12 +42,32 @@ def compare_mfcc( tFile, aFile ):
     dist = dtw( mfcct, mfcca, mfcct.shape[0], mfcca.shape[0], norm ) 
     print( dist )
 
+# TODO Verify
+def compare_test_with_BA( tFile, aFiles ):
+
+    distPerFile = list()
+    for f in aFiles:
+        distPerFile.append( compare_mfcc( tFile, f ) )
+
+    print( aFiles.index( min(distPerFile) ) )
+
+# TODO prendre en compte le chemin absolue des fichiers
+def BA_file2list( inputBA ):
+    with open( inputBA, "r" ) as ba:
+        ba_list = ba.readlines();
+    ba_list = [x.strip() for x in ba_list]
+    ba.close()
+
+    return ba_list
+
 
 # ------------------------------------------------------------------------------------- # 
 
-if ( len( sys.argv ) != 3 ):
-    print( "Usage: $python3 %s <file1.wav> <file2.wav>" % sys.argv[0] )
-    exit( -1 )
-    
-print( "Comparing", sys.argv[1], sys.argv[2] )
-compare_mfcc( sys.argv[1], sys.argv[2] )	
+# if ( len( sys.argv ) != 3 ):
+#     print( "Usage: $python3 %s <file1.wav> <file2.wav>" % sys.argv[0] )
+#     exit( -1 )
+
+# print( "Comparing", sys.argv[1], sys.argv[2] )
+# compare_mfcc( sys.argv[1], sys.argv[2] )	
+
+print( BA_file2list( sys.argv[1] ) )
