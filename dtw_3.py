@@ -44,24 +44,15 @@ def dtw( A, B, I, J, x ):
                            g[i][j-1] + w2*d )
     return g[I-1][J-1] / ( I+J )
 
-
-def compare_mfcc( file1, file2 ):
-    y1, sr1 = librosa.load( file1 )
-    y2, sr2 = librosa.load( file2 )
+# np.linalg.norm( fi, fg )
+def compare_mfcc( tFile, aFile ):
+    y1, sr1 = librosa.load( tFile )
+    y2, sr2 = librosa.load( aFile )
     
-    mfcc1 = np.array( librosa.feature.mfcc( y=y1, sr=sr1) )
-    mfcc2 = np.array( librosa.feature.mfcc( y=y2, sr=sr2) )
+    mfcc1 = np.array( librosa.feature.mfcc( y=y1, sr=sr1, hop_length=1024, htk=True, n_mfcc=12 ) ) 
+    mfcc2 = np.array( librosa.feature.mfcc( y=y2, sr=sr2, hop_length=1024, htk=True, n_mfcc=12 ) )
 
-    dist = list()
-    for i in range( len( mfcc1 ) ):
-        I = len( mfcc1[i] )
-        J = len( mfcc2[i] )
-        dist.append( dtw( mfcc1[i], mfcc2[i], I, J, euclidienne ) )
-
-    dist = np.array( dist )
-    avr_dist = np.average( dist )
-    print( dist, "\n", avr_dist )
- 
+    
 # TODO le contenu de dist est peut être pas bon 
 # ------------------------------------------------------------------------------------- # 
 
