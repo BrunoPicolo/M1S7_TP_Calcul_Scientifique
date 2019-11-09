@@ -32,42 +32,48 @@ def dtw( A, B, I, J, x ):
                            g[i][j-1] + w2*d )
     return g[I-1][J-1] / ( I+J )
 
-def compare_mfcc( tFile, aFile ):
-    y1, sr1 = librosa.load( tFile )
-    y2, sr2 = librosa.load( aFile )
+def compare2samples( sample1, sample2 ):
+    y1, sr1 = librosa.load( sample1 )
+    y2, sr2 = librosa.load( sample2 )
     
     mfcct = np.array( librosa.feature.mfcc( y=y1, sr=sr1, hop_length=1024, htk=True, n_mfcc=12 ) ).transpose()
     mfcca = np.array( librosa.feature.mfcc( y=y2, sr=sr2, hop_length=1024, htk=True, n_mfcc=12 ) ).transpose()
 
     dist = dtw( mfcct, mfcca, mfcct.shape[0], mfcca.shape[0], norm ) 
-    print( dist )
+    return dist
 
-# TODO Verify
-def compare_test_with_BA( tFile, aFiles ):
-
+# Compare la base de test avec la base d'apprentisage pour trouver
+# l'audio le plus similaire
+def compare_sample_with_BT( sample, baseTest ):
     distPerFile = list()
-    for f in aFiles:
-        distPerFile.append( compare_mfcc( tFile, f ) )
+    for f in baseTest:
+        distPerFile.append( compare2samples( sample, f ) )
+   
+    index = distPerFile.index( min( distPerFile ) ) 
+    return baseTest[index].split('/')[-1]
 
-    print( aFiles.index( min(distPerFile) ) )
-
-# TODO prendre en compte le chemin absolue des fichiers
+# Construit une liste avec un fichier contenant le 
+# nom des fichiers de la Base d'apprentissage.
 def BA_file2list( inputBA ):
+    location = "data/bruite/" # En cas ou les fichiers ne soient dans le même repertoire que dtw.py 
     with open( inputBA, "r" ) as ba:
-        ba_list = ba.readlines();
-    ba_list = [x.strip() for x in ba_list]
+        tmp = ba.readlines();
+    tmp = [x.strip() for x in tmp]
+   
+    ba_list = list()
+    for x in tmp:
+        ba_list.append( location + x )
     ba.close()
+    return ba_list 
 
-    return ba_list
-
-
+# TODO Je crois que quelque chose est mal car la le fichier M02_arretetoi.wav est aussi dans la BT et n'est pas le resultat ... 
 # ------------------------------------------------------------------------------------- # 
 
-# if ( len( sys.argv ) != 3 ):
-#     print( "Usage: $python3 %s <file1.wav> <file2.wav>" % sys.argv[0] )
-#     exit( -1 )
+if ( len( sys.argv ) != 3 ):
+    print( "Usage: $python3 %s <file1.wav> <base_d'aprentisage>" % sys.argv[0] )
+    exit( -1 )
 
-# print( "Comparing", sys.argv[1], sys.argv[2] )
-# compare_mfcc( sys.argv[1], sys.argv[2] )	
+print( "Comparing", sys.argv[1].split('/')[-1], "avec base d'apprentisage ", sys.argv[2].split('/')[-1] )
 
-print( BA_file2list( sys.argv[1] ) )
+ba_list =  BA_file2list( sys.argv[2] )
+print( compare_sample_with_BT( sys.argv[1], ba_list ) )
