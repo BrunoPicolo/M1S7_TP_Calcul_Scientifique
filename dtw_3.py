@@ -47,8 +47,14 @@ def compare2samples( sample1, sample2 ):
 def compare_sample_with_BT( sample, baseTest ):
     distPerFile = list()
     for f in baseTest:
-        distPerFile.append( compare2samples( sample, f ) )
+        if (sample != f):
+            distPerFile.append( compare2samples( sample, f ) )
+        else:
+            distPerFile.append(999);
    
+    for i in range(len(baseTest)):
+        print( baseTest[i], distPerFile[i], "\n" )
+
     index = distPerFile.index( min( distPerFile ) ) 
     return baseTest[index].split('/')[-1]
 
@@ -66,7 +72,6 @@ def BA_file2list( inputBA ):
     ba.close()
     return ba_list 
 
-# TODO Je crois que quelque chose est mal car la le fichier M02_arretetoi.wav est aussi dans la BT et n'est pas le resultat ... 
 # ------------------------------------------------------------------------------------- # 
 
 if ( len( sys.argv ) != 3 ):
@@ -77,3 +82,12 @@ print( "Comparing", sys.argv[1].split('/')[-1], "avec base d'apprentisage ", sys
 
 ba_list =  BA_file2list( sys.argv[2] )
 print( compare_sample_with_BT( sys.argv[1], ba_list ) )
+
+# Exemple d'exécution :
+# $ python3 dtw_3.py data/bruite/M02_arretetoi.wav M02_bruite_BA.txt 
+# Le M02_bruite_BA.txt est la base de test et M02_arretetoi.wav est l'audio à comparer 
+# Il faut modifier  l'atribut location avec le repertoire ou se trouvent les fichiers de la base de test. Dans mon cas je les ai placé dans "data/bruite/"
+
+# TODO ajouter un nouveau champ sur le fichier M02_bruite_BA.txt contenant la localisation des fichiers.
+
+
