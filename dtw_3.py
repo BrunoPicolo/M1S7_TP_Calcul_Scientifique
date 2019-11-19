@@ -104,7 +104,6 @@ def find_best_comparation_per_file(baseA, baseT, compareMatrix):
         listBestComp.append(baseT[indexBestComp])
 
     return listBestComp
-## TODO fixer erreur à la ligne 80
 
 # ------------------------------------------------------------------------------------- # 
     
