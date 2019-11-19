@@ -6,13 +6,20 @@ import librosa
 import sys
 import numpy as np
 # from google.colab import drive
+from sklearn.metrics import confusion_matrix
+from sklearn.metrics import accuracy_score 
+from sklearn.metrics import classification_report 
 
-# norm of two vector of the same size
 def norm(A, B):
+    """
+        norm of two vector of the same size
+    """
     s = 0 
     for i in range(len(A)):
         s += (A[i] - B[i])**2
     return math.sqrt(s)
+
+# ------------------------------------------------------------------------------------- # 
  
 def dtw(A, B, I, J, x):
     w0 = 1
@@ -32,6 +39,8 @@ def dtw(A, B, I, J, x):
                            g[i][j-1] + w2*d)
     return g[I-1][J-1] / (I+J)
 
+# ------------------------------------------------------------------------------------- # 
+
 def compare2samples(sample1, sample2):
     y1, sr1 = librosa.load(sample1)
     y2, sr2 = librosa.load(sample2)
@@ -42,9 +51,13 @@ def compare2samples(sample1, sample2):
     dist = dtw(mfcct, mfcca, mfcct.shape[0], mfcca.shape[0], norm) 
     return dist
 
-# Compare la base de test avec la base d'apprentisage pour trouver
-# l'audio le plus similaire
+# ------------------------------------------------------------------------------------- # 
+
 def compare_sample_with_BT(sample, baseTest):
+    """ 
+        Compare un seul sample avec une base d'apprentissage dont
+        le but de trouver le correspondant le plus similaires.
+    """
     distPerFile = list()
     for f in baseTest:
         if (sample != f):
@@ -58,9 +71,12 @@ def compare_sample_with_BT(sample, baseTest):
     index = distPerFile.index(min(distPerFile)) 
     return baseTest[index].split('/')[-1]
 
-# Compare deux listes avec dtw 
-# return la matrice de la comparaison entre baseA et baseT
+# ------------------------------------------------------------------------------------- # 
+
 def compare_BA_BT(baseA, baseT):
+    """ 
+        Compare une base de test avec une base d'apprentissage.
+    """
     I = len(baseA)
     J = len(baseT)
 
@@ -71,28 +87,44 @@ def compare_BA_BT(baseA, baseT):
     
     return compareMatrix
 
-# Trouve la meilleur comparaison de la base de test pour chaque fichier 
-# de la base d'apprentissage 
+# ------------------------------------------------------------------------------------- # 
+
 def find_best_comparation_per_file(baseA, baseT, compareMatrix):
-    appDict = dict()
+    """ 
+        Trouve la meilleur comparaison pour chaque fichier de la base
+        de test avec la base d'apprentissage.
+    """
+   
+    listBestComp = list()
+    line = list()
 
     for i in range(len(baseA)):
-        indexBestComp = compareMatrix[i].index(min(compareMatrix[i])) 
-        appDict.update({baseA[i], baseT(indexBestComp)})
+        line = list(compareMatrix[i])
+        indexBestComp = line.index(min(compareMatrix[i])) 
+        listBestComp.append(baseT[indexBestComp])
 
-    return appDict
+    return listBestComp
 ## TODO fixer erreur à la ligne 80
+
+# ------------------------------------------------------------------------------------- # 
     
-def confusion_matrix(appDict):
-    # Creer une liste avec les clés
-    # Créer une liste avec les valeurs
-    # Exécuter la fonction de la librairie comfusion_matrix entre ce deux listes
-    pass
+def naif(baseA, bestCompBaseT):
+    results = confusion_matrix(baseA, bestCompBaseT)
+    print('Confusion Matrix :')
+    print(results)
+    print('Accuracy Score :',accuracy_score(baseA, bestCompBaseT))
+    print('Report : ')
+    print(classification_report(baseA, bestCompBaseT))
+
+
+# ------------------------------------------------------------------------------------- # 
 
 # TODO ajouter la localisation dans la première ligne du fichier
-# Construit une liste avec un fichier contenant le 
-# nom des fichiers de la Base d'apprentissage.
 def file2list(location, inputBA):
+    """
+        Construit une liste avec un fichier contenant le 
+        nom des fichiers de la Base d'apprentissage.
+    """
     with open(inputBA, "r") as ba:
         tmp = ba.readlines();
     tmp = [x.strip() for x in tmp]
@@ -115,10 +147,12 @@ print("Comparing base d'apprentisage", sys.argv[1].split('/')[-1], " avec base d
 ba_list = file2list("data/bruite/", sys.argv[1])
 bt_list = file2list("data/bruite/", sys.argv[2]) 
 matrix = compare_BA_BT(ba_list, bt_list)
-print( matrix )
-dictionaire = find_best_comparation_per_file(ba_list, bt_list, matrix)
-print( dictionaire )
+comparations= find_best_comparation_per_file(ba_list, bt_list, matrix)
 
+for i in range(len(comparations)):
+    print( ba_list[i], " ", comparations[i], "\n" )
+
+naif(ba_list, comparations)
 
 #########################################################################################
 
