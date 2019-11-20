@@ -160,22 +160,36 @@ def compare2samples(sample1, sample2):
     return dist
 
 # --------------------------------------------- MAIN --------------------------------------------- # 
+def mainPartie2():
+	matrix = compare_BT_BA(bt_list, ba_list)
+	(index, comparations)= find_best_comparation_per_file(bt_list, ba_list, matrix)
 
-if (len(sys.argv) != 3):
-    print("Usage: $python3 %s <base d'aprentisage> <base de test>" % sys.argv[0])
+	for i in range(len(comparations)):
+		print( bt_list[i].split('/')[-1][:-4], "\t\t\t", comparations[i].split('/')[-1][:-4] )
+
+	tab = [x for x in range(len(ba_list))]
+	confusion_m(tab, index)
+
+def mainPartie3():
+	matrix = compare_BT_BA(bt_list, ba_list)
+	(index, comparations)= find_best_comparation_per_file(bt_list, ba_list, matrix)
+
+	for i in range(len(comparations)):
+		print( bt_list[i].split('/')[-1][:-4], "\t\t\t", comparations[i].split('/')[-1][:-4] )
+
+	tab = [x for x in range(len(ba_list))]
+	confusion_m(tab, index)
+
+# MAIN 
+if (len(sys.argv) != 2):
+    print("Usage: $python3 %s ./corpus/FichierTest/<Nomfichier>" % sys.argv[0])
     exit(-1)
 
-print("Comparing base d'apprentisage", sys.argv[1].split('/')[-1], " avec base de test ", sys.argv[2].split('/')[-1])
+print("Comparing base d'apprentisage baseDonnee_BA avec base de test ", sys.argv[1].split('/')[-1])
 
 
-ba_list = file2list("data/nonbruite/", sys.argv[1])
-bt_list = file2list("data/nonbruite/", sys.argv[2]) 
-matrix = compare_BT_BA(bt_list, ba_list)
-(index, comparations)= find_best_comparation_per_file(bt_list, ba_list, matrix)
+ba_list = file2list("./corpus/baseDonnee_BA")
+bt_list = file2list("corpus/BaseT/", sys.argv[1]) 
+mainPartie2()
 
-for i in range(len(comparations)):
-    print( bt_list[i].split('/')[-1][:-4], "\t\t\t", comparations[i].split('/')[-1][:-4] )
-
-tab = [x for x in range(len(ba_list))]
-confusion_m(tab, index)
 
