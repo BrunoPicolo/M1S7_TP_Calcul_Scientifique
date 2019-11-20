@@ -118,14 +118,14 @@ def file2list(location, inputBA):
 # --------------------------------------------- MAIN --------------------------------------------- # 
 
 if (len(sys.argv) != 3):
-    print("Usage: $python3 %s <base d'aprentisage> <base de test>" % sys.argv[0])
+    print("Usage: $python3 %s ./corpus/FichierTest/<Nomfichier>" % sys.argv[0])
     exit(-1)
 
-print("Comparing base d'apprentisage", sys.argv[1].split('/')[-1], " avec base de test ", sys.argv[2].split('/')[-1])
+print("Comparing base d'apprentisage baseDonnee_BA avec base de test ", sys.argv[1].split('/')[-1])
 
 
-ba_list = file2list("corpus/", sys.argv[1]	)
-bt_list = file2list("corpus/BaseT/", sys.argv[2]) 
+ba_list = file2list("./corpus/baseDonnee_BA")
+bt_list = file2list("corpus/BaseT/", sys.argv[1]) 
 matrix = compare_BT_BA(bt_list, ba_list)
 (index, comparations)= find_best_comparation_per_file(bt_list, ba_list, matrix)
 
