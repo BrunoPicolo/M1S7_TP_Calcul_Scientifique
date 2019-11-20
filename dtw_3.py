@@ -6,9 +6,14 @@ import librosa
 import sys
 import numpy as np
 # from google.colab import drive
+
 from sklearn.metrics import confusion_matrix
 from sklearn.metrics import accuracy_score 
 from sklearn.metrics import classification_report 
+
+from sklearn.preprocessing import StandardScaler
+from sklearn.neighbors import KNeighborsClassifier
+from mpl_toolkits.mplot3d import Axes3D
 
 def norm(A, B):
     """
@@ -47,6 +52,9 @@ def compare2samples(sample1, sample2):
     
     mfcc1 = np.array(librosa.feature.mfcc(y=y1, sr=sr1, hop_length=1024, htk=True, n_mfcc=12)).transpose()
     mfcc2 = np.array(librosa.feature.mfcc(y=y2, sr=sr2, hop_length=1024, htk=True, n_mfcc=12)).transpose()
+
+    reduct1 = average_mfcc(mfcc1)
+    reduct2 = average_mfcc(mfcc2)
 
     dist = dtw(mfcc1, mfcc2, mfcc1.shape[0], mfcc2.shape[0], norm) 
     return dist
@@ -114,6 +122,42 @@ def file2list(location, inputBA):
         ba_list.append(location + x)
     ba.close()
     return ba_list 
+
+# ------------------------------------------- PARTIE 3 ------------------------------------------ # 
+
+def average_mfcc(mfcc):
+    a = 0
+    n = list()
+    for x in mfcc:
+        n.append(sum(x)/len(x))
+    return n
+
+def calculate_principal_axes_BA(baseA):
+    listReductionsBaseA = list()
+    for sample in baseA:
+        y, sr = librosa.load(sample1) 
+        mfcc = np.array(librosa.feature.mfcc(y=y, sr=sr, hop_length=1024, htk=True, n_mfcc=12)).transpose()
+        
+        listReductionsBaseA.append(average_mfcc(mfcc))
+    
+    pca = PCA(n_components=12)
+    pca.fit(X)
+    
+
+# ------------------------------------------------------------------------------------- # 
+
+def compare2samples(sample1, sample2):
+    y1, sr1 = librosa.load(sample1)
+    y2, sr2 = librosa.load(sample2)
+    
+    mfcc1 = np.array(librosa.feature.mfcc(y=y1, sr=sr1, hop_length=1024, htk=True, n_mfcc=12)).transpose()
+    mfcc2 = np.array(librosa.feature.mfcc(y=y2, sr=sr2, hop_length=1024, htk=True, n_mfcc=12)).transpose()
+
+    reduct1 = average_mfcc(mfcc1)
+    reduct2 = average_mfcc(mfcc2)
+
+    dist = dtw(mfcc1, mfcc2, mfcc1.shape[0], mfcc2.shape[0], norm) 
+    return dist
 
 # --------------------------------------------- MAIN --------------------------------------------- # 
 
