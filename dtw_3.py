@@ -124,8 +124,8 @@ if (len(sys.argv) != 3):
 print("Comparing base d'apprentisage", sys.argv[1].split('/')[-1], " avec base de test ", sys.argv[2].split('/')[-1])
 
 
-ba_list = file2list("data/nonbruite/", sys.argv[1])
-bt_list = file2list("data/nonbruite/", sys.argv[2]) 
+ba_list = file2list("corpus/", sys.argv[1]	)
+bt_list = file2list("corpus/BaseT/", sys.argv[2]) 
 matrix = compare_BT_BA(bt_list, ba_list)
 (index, comparations)= find_best_comparation_per_file(bt_list, ba_list, matrix)
 
