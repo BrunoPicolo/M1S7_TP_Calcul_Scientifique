@@ -116,8 +116,28 @@ def file2list(location, inputBA):
     return ba_list 
 
 # --------------------------------------------- MAIN --------------------------------------------- # 
+def mainPartie2():
+	matrix = compare_BT_BA(bt_list, ba_list)
+	(index, comparations)= find_best_comparation_per_file(bt_list, ba_list, matrix)
 
-if (len(sys.argv) != 3):
+	for i in range(len(comparations)):
+		print( bt_list[i].split('/')[-1][:-4], "\t\t\t", comparations[i].split('/')[-1][:-4] )
+
+	tab = [x for x in range(len(ba_list))]
+	confusion_m(tab, index)
+
+def mainPartie3():
+	matrix = compare_BT_BA(bt_list, ba_list)
+	(index, comparations)= find_best_comparation_per_file(bt_list, ba_list, matrix)
+
+	for i in range(len(comparations)):
+		print( bt_list[i].split('/')[-1][:-4], "\t\t\t", comparations[i].split('/')[-1][:-4] )
+
+	tab = [x for x in range(len(ba_list))]
+	confusion_m(tab, index)
+
+# MAIN 
+if (len(sys.argv) != 2):
     print("Usage: $python3 %s ./corpus/FichierTest/<Nomfichier>" % sys.argv[0])
     exit(-1)
 
@@ -126,12 +146,6 @@ print("Comparing base d'apprentisage baseDonnee_BA avec base de test ", sys.argv
 
 ba_list = file2list("./corpus/baseDonnee_BA")
 bt_list = file2list("corpus/BaseT/", sys.argv[1]) 
-matrix = compare_BT_BA(bt_list, ba_list)
-(index, comparations)= find_best_comparation_per_file(bt_list, ba_list, matrix)
+mainPartie2()
 
-for i in range(len(comparations)):
-    print( bt_list[i].split('/')[-1][:-4], "\t\t\t", comparations[i].split('/')[-1][:-4] )
-
-tab = [x for x in range(len(ba_list))]
-confusion_m(tab, index)
 
