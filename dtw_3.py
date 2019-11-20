@@ -45,75 +45,56 @@ def compare2samples(sample1, sample2):
     y1, sr1 = librosa.load(sample1)
     y2, sr2 = librosa.load(sample2)
     
-    mfcct = np.array(librosa.feature.mfcc(y=y1, sr=sr1, hop_length=1024, htk=True, n_mfcc=12)).transpose()
-    mfcca = np.array(librosa.feature.mfcc(y=y2, sr=sr2, hop_length=1024, htk=True, n_mfcc=12)).transpose()
+    mfcc1 = np.array(librosa.feature.mfcc(y=y1, sr=sr1, hop_length=1024, htk=True, n_mfcc=12)).transpose()
+    mfcc2 = np.array(librosa.feature.mfcc(y=y2, sr=sr2, hop_length=1024, htk=True, n_mfcc=12)).transpose()
 
-    dist = dtw(mfcct, mfcca, mfcct.shape[0], mfcca.shape[0], norm) 
+    dist = dtw(mfcc1, mfcc2, mfcc1.shape[0], mfcc2.shape[0], norm) 
     return dist
 
 # ------------------------------------------------------------------------------------- # 
 
-def compare_sample_with_BT(sample, baseTest):
-    """ 
-        Compare un seul sample avec une base d'apprentissage dont
-        le but de trouver le correspondant le plus similaires.
-    """
-    distPerFile = list()
-    for f in baseTest:
-        if (sample != f):
-            distPerFile.append(compare2samples(sample, f))
-        else:
-            distPerFile.append(999);
-   
-    for i in range(len(baseTest)):
-        print(baseTest[i], distPerFile[i], "\n")
-
-    index = distPerFile.index(min(distPerFile)) 
-    return baseTest[index].split('/')[-1]
-
-# ------------------------------------------------------------------------------------- # 
-
-def compare_BA_BT(baseA, baseT):
+def compare_BT_BA(baseT, baseA):
     """ 
         Compare une base de test avec une base d'apprentissage.
     """
-    I = len(baseA)
-    J = len(baseT)
+    I = len(baseT)
+    J = len(baseA)
 
     compareMatrix = np.empty((I, J), dtype=float)
     for i in range(I):
         for j in range(J):
-            compareMatrix[i][j] = compare2samples(baseA[i], baseT[j]) 
+            compareMatrix[i][j] = compare2samples(baseT[i], baseA[j]) 
     
     return compareMatrix
 
 # ------------------------------------------------------------------------------------- # 
 
-def find_best_comparation_per_file(baseA, baseT, compareMatrix):
+def find_best_comparation_per_file(baseT, baseA, compareMatrix):
     """ 
         Trouve la meilleur comparaison pour chaque fichier de la base
         de test avec la base d'apprentissage.
     """
    
     listBestComp = list()
-    line = list()
+    listIndexBestComp = list()
 
-    for i in range(len(baseA)):
+    for i in range(len(baseT)):
         line = list(compareMatrix[i])
         indexBestComp = line.index(min(compareMatrix[i])) 
-        listBestComp.append(baseT[indexBestComp])
+        listIndexBestComp.append(indexBestComp)
+        listBestComp.append(baseA[indexBestComp])
 
-    return listBestComp
+    return (listIndexBestComp, listBestComp)
 
 # ------------------------------------------------------------------------------------- # 
     
-def naif(baseA, bestCompBaseT):
-    results = confusion_matrix(baseA, bestCompBaseT)
+def confusion_m(actual, predicted):
+    results = confusion_matrix(actual, predicted)
     print('Confusion Matrix :')
     print(results)
-    print('Accuracy Score :',accuracy_score(baseA, bestCompBaseT))
+    print('Accuracy Score :',accuracy_score(actual, predicted))
     print('Report : ')
-    print(classification_report(baseA, bestCompBaseT))
+    print(classification_report(actual, predicted))
 
 
 # ------------------------------------------------------------------------------------- # 
@@ -134,7 +115,7 @@ def file2list(location, inputBA):
     ba.close()
     return ba_list 
 
-# ------------------------------------------------------------------------------------- # 
+# --------------------------------------------- MAIN --------------------------------------------- # 
 
 if (len(sys.argv) != 3):
     print("Usage: $python3 %s <base d'aprentisage> <base de test>" % sys.argv[0])
@@ -143,28 +124,14 @@ if (len(sys.argv) != 3):
 print("Comparing base d'apprentisage", sys.argv[1].split('/')[-1], " avec base de test ", sys.argv[2].split('/')[-1])
 
 
-ba_list = file2list("data/bruite/", sys.argv[1])
-bt_list = file2list("data/bruite/", sys.argv[2]) 
-matrix = compare_BA_BT(ba_list, bt_list)
-comparations= find_best_comparation_per_file(ba_list, bt_list, matrix)
+ba_list = file2list("data/nonbruite/", sys.argv[1])
+bt_list = file2list("data/nonbruite/", sys.argv[2]) 
+matrix = compare_BT_BA(bt_list, ba_list)
+(index, comparations)= find_best_comparation_per_file(bt_list, ba_list, matrix)
 
 for i in range(len(comparations)):
-    print( ba_list[i], " ", comparations[i], "\n" )
+    print( bt_list[i].split('/')[-1][:-4], "\t\t\t", comparations[i].split('/')[-1][:-4] )
 
-naif(ba_list, comparations)
+tab = [x for x in range(13)]
+confusion_m(tab, index)
 
-#########################################################################################
-
-# Exemple d'exécution :
-# $ python3 dtw_3.py data/bruite/M02_arretetoi.wav M02_bruite_BA.txt 
-# Le M02_bruite_BA.txt est la base de test et M02_arretetoi.wav est l'audio à comparer 
-# Il faut modifier  l'atribut location avec le repertoire ou se trouvent les fichiers de la base de test. Dans mon cas je les ai placé dans "data/bruite/"
-
-# https://github.com/roadroller2da/sound-recognition/blob/master/svm_mfcc_librosa.py
-# https://mc.ai/sound-classification-using-deep-learning/
-# https://github.com/chaosparrot/parrot.py/blob/master/lib/machinelearning.py
-
-# Il faut comparer une base de tests et une base source avec une mfcc. -> On trouve une matrice.
-# Ensuite on prend le minimum de chaque ligne (de chaque distance) 
-# Il faut trouver les fichiers qui correspondent à la case de la distance minimal de chaque ligne -> Deux listes avec les noms des audios.
-# Finalement il faut utiliser confusion_matrix avec les deux listes précédentes. 
