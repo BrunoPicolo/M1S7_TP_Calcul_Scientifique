@@ -13,6 +13,7 @@ from sklearn.metrics import classification_report
 
 from sklearn.preprocessing import StandardScaler
 from sklearn.neighbors import KNeighborsClassifier
+from sklearn.decomposition import PCA
 from mpl_toolkits.mplot3d import Axes3D
 
 def norm(A, B):
@@ -134,15 +135,20 @@ def average_mfcc(mfcc):
 
 def calculate_principal_axes_BA(baseA):
     listReductionsBaseA = list()
-    for sample in baseA:
-        y, sr = librosa.load(sample1) 
+    I = len(baseA)
+    for i in range (I):
+        y, sr = librosa.load(baseA[i])
         mfcc = np.array(librosa.feature.mfcc(y=y, sr=sr, hop_length=1024, htk=True, n_mfcc=12)).transpose()
-        
-        listReductionsBaseA.append(average_mfcc(mfcc))
-    
-    pca = PCA(n_components=12)
-    pca.fit(X)
-    
+
+    pca = PCA(n_components=12,svd_solver='full')
+    pca.fit(mfcc)
+
+    list_vp = pca.singular_values_
+    list_vp = sorted(list_vp,reverse=True)
+    return list_vp[0:3]
+
+def part3Test (baseA):
+	print(calculate_principal_axes_BA(baseA))
 
 # ------------------------------------------------------------------------------------- # 
 
@@ -171,14 +177,7 @@ def mainPartie2():
 	confusion_m(tab, index)
 
 def mainPartie3():
-	matrix = compare_BT_BA(bt_list, ba_list)
-	(index, comparations)= find_best_comparation_per_file(bt_list, ba_list, matrix)
-
-	for i in range(len(comparations)):
-		print( bt_list[i].split('/')[-1][:-4], "\t\t\t", comparations[i].split('/')[-1][:-4] )
-
-	tab = [x for x in range(len(ba_list))]
-	confusion_m(tab, index)
+	part3Test(ba_list)
 
 # MAIN 
 if (len(sys.argv) != 2):
@@ -188,8 +187,8 @@ if (len(sys.argv) != 2):
 print("Comparing base d'apprentisage baseDonnee_BA avec base de test ", sys.argv[1].split('/')[-1])
 
 
-ba_list = file2list("./corpus/baseDonnee_BA")
+ba_list = file2list("corpus/BaseA/","./corpus/baseDonnee_BA")
 bt_list = file2list("corpus/BaseT/", sys.argv[1]) 
-mainPartie2()
+mainPartie3()
 
 
