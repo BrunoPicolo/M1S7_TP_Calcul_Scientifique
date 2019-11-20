@@ -132,6 +132,6 @@ matrix = compare_BT_BA(bt_list, ba_list)
 for i in range(len(comparations)):
     print( bt_list[i].split('/')[-1][:-4], "\t\t\t", comparations[i].split('/')[-1][:-4] )
 
-tab = [x for x in range(13)]
+tab = [x for x in range(len(ba_list))]
 confusion_m(tab, index)
 
